@@ -1,5 +1,15 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem
+} from "@/components/ui/carousel";
 import { createFileRoute, useLoaderData } from '@tanstack/react-router';
-import { useState, useEffect } from 'react';
+import Autoplay from 'embla-carousel-autoplay';
+import { Clock } from 'lucide-react';
+import { Badge } from "@/components/ui/badge"
+import { useEffect, useState } from 'react';
+
 
 export const Route = createFileRoute('/')({
   component: Index,
@@ -75,6 +85,10 @@ function Index() {
   const grouped = groupByDay(animeList);
   const days = ["Sundays", "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays"]
 
+  const uniqueAnimeList = Array.from(
+    new Map(animeList.map(anime => [anime.mal_id, anime])).values()
+  );
+
   const totalAnime = animeList.length;
   const todayAnime = animeList.filter((anime) => {
     return anime.broadcast?.day === days[currentTime.getDay()]
@@ -131,6 +145,9 @@ function Index() {
     };
   }
 
+  // console.log(animeList);
+
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       <div className="container mx-auto p-2.5 md:p-6">
@@ -147,143 +164,107 @@ function Index() {
             {totalAnime} anime series airing this season
           </p>
           <h2 className="bg-black text-white px-4 py-2 border-4 border-black transform rotate-1 w-fit font-black">Today's Anime - {days[currentTime.getDay()]}</h2>
+          <Carousel className='pt-2.5' opts={{
+            align: "start",
+            loop: true,
+          }} plugins={[
+            Autoplay({
+              delay: 2000,
+            }),
+          ]}>
+            <CarouselContent>
+              {todayAnime.map((anime, index) => {
+                const localTime = convertBroadcastToLocal(anime);
 
-          <ul className='mt-5 grid grid-cols-2 lg:grid-cols-4 gap-3'>
-            {todayAnime.map((anime, index) => {
-              const localTime = convertBroadcastToLocal(anime);
-
-              return (
-                <li key={`${index}-${anime.mal_id}`} className={`p-2 md:p-3.5 group relative border-4 border-black bg-white shadow-md transition-all duration-300 rounded-lg`}>
-                  <div className="absolute -inset-1 bg-black transform rotate-2 -z-10"></div>
-                  <div className='w-full h-auto rounded-lg overflow-hidden'>
-                    <img
-                      className='size-full object-cover'
-                      src={anime.images.webp.large_image_url}
-                      alt={anime.title}
-                    />
-                  </div>
-                  <div className='flex-1 pt-2.5'>
-                    <h3 className='font-bold md:text-xl leading-none'>{anime.title}</h3>
-                    {localTime && (
-                      <p className='text-sm text-gray-600 mt-1'>
-                        {localTime.localDayName} at {localTime.localTime}
-                      </p>
-                    )}
-                    {!localTime && (
-                      <p className='text-sm text-gray-500 mt-1'>Time not available</p>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+                return (
+                  <CarouselItem
+                    key={index}
+                    className="basis-full md:basis-1/2" // Mobile: 1 slide, Desktop: 2 slides
+                  >
+                    <div>
+                      <div className='w-full h-72 rounded-lg overflow-hidden'>
+                        <img
+                          className='size-full object-cover'
+                          src={anime.images.webp.large_image_url}
+                          alt={anime.title}
+                        />
+                      </div>
+                      <div className='pt-2.5'>
+                        <h3 className='text-2xl font-bold tracking-tighter leading-none'>{anime.title}</h3>
+                        <div className='pt-1.5'>
+                          {localTime && (
+                            <p>{localTime.localDayName} at {localTime.localTime}</p>
+                          )}
+                          {!localTime && (
+                            <p>Time not available</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </CarouselItem>
+                );
+              })}
+            </CarouselContent>
+          </Carousel>
         </section>
         <section className='py-7'>
           <h2 className="bg-black text-white px-4 py-2 border-4 border-black transform rotate-1 w-fit font-black">This Season's Anime</h2>
           <ul className='flex mt-5 space-x-2.5 overflow-x-scroll'>
-            {animeList.map((anime, index) => (
-              <li key={`${index}-${anime.episodes}`} className={`p-2 md:p-3.5 group relative border-4 border-black bg-white shadow-md transition-all duration-300 flex items-start gap-2.5 rounded-lg`}>
+            {uniqueAnimeList.map((anime, index) => (
+              <li key={`${index}-${anime.episodes}`} className={`group relative bg-white shadow-md transition-all duration-300 flex items-start gap-2.5 rounded-lg`}>
+                <h2 className="bg-black text-white p-0.5 border-4 border-black absolute top-2.5 w-fit text-xs mx-2.5 text-left">{anime.title}</h2>
                 <div className='w-[225px] h-[318px] rounded-lg overflow-hidden'>
-                  <img className='size-full object-cover' src={`${anime.images.webp.image_url}`} alt="" />
+                  <img className='size-full object-cover' src={`${anime.images.webp.large_image_url}`} alt="" />
                 </div>
               </li>
             ))}
           </ul>
         </section>
 
-        {/* Schedule Grid */}
-
         <section>
-          <h2 className="bg-black text-white px-4 py-2 border-4 border-black transform rotate-1 w-fit font-black">Weekly Schedule</h2>
-          <div className="grid gap-6 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-2.5">
+          <div className="flex items-center space-x-2 mb-6">
+            <h2 className="bg-black text-white px-4 py-2 border-4 border-black transform rotate-1 w-fit font-black">Weekly Schedule</h2>
+          </div>
 
-            {Object.entries(grouped).map(([day, animeArray], index) => (
-              <div key={`${day}-${index}`}>
-                <div className="pb-4">
-                  <h2 className="bg-black text-white px-1 border-4 border-black transform rotate-1 w-fit font-black">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            {Object.entries(grouped).map(([day, episodes]) => (
+              <Card key={day} className="h-fit shadow-none gap-2.5">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-gray-900 flex items-center justify-between">
                     {day}
-                  </h2>
-                  <p className="text-center bg-gray-500 text-white my-2.5 transform -rotate-1">
-                    {animeArray.length} series
-                  </p>
-                </div>
-                <div className="space-y-4">
-                  {animeArray.map((anime, index) => {
-                    const localTime = convertBroadcastToLocal(anime);
-
-                    return (
-                      <div
-                        key={`${anime.mal_id}-${index}`}
-                        className="group relative overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] p-3"
-                      >
-                        <div className="overflow-hidden">
-                          <div className="">
-                            {anime.episodes && (
-                              <div className="text-xs opacity-90 mb-1">
-                                {anime.episodes} episodes
-                              </div>
-                            )}
-
-                            {/* JST Time */}
-                            {anime.broadcast?.time && (
-                              <div className="text-xs opacity-75 mb-1">
-                                <span className="font-medium">JST:</span> {anime.broadcast.time}
-                              </div>
-                            )}
-
-                            {/* Local Time */}
-                            {localTime && (
-                              <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                                <span className="font-medium">Local:</span> {localTime.localTime}
-                                {localTime.localDayName !== day.slice(0, -1) && (
-                                  <span className="ml-1 text-orange-600 dark:text-orange-400">
-                                    ({localTime.localDayName})
-                                  </span>
-                                )}
-                              </div>
-                            )}
-
-                            {!localTime && anime.broadcast?.time && (
-                              <div className="text-xs text-gray-500">
-                                Local time unavailable
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="">
-                          <h3 className="font-medium text-sm line-clamp-2 text-slate-800 dark:text-slate-200">
-                            {anime.title}
-                          </h3>
-
-                          {anime.genres && anime.genres.length > 0 && (
-                            <div className="mt-2 flex flex-wrap gap-1">
-                              {anime.genres.slice(0, 2).map((genre) => (
-                                <span
-                                  key={genre.name}
-                                  className="inline-block px-2 py-1 text-xs text-white bg-black"
-                                >
-                                  {genre.name}
-                                </span>
-                              ))}
-                              {anime.genres.length > 2 && (
-                                <span className="inline-block px-2 py-1 text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 rounded-full">
-                                  +{anime.genres.length - 2}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </div>
+                    <Badge variant="outline">{episodes.length} series</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {episodes.map((episode, index) => (
+                    <div
+                      key={index}
+                      className="border-l-2 border-rose-200 pl-3 hover:border-blue-400 transition-colors"
+                    >
+                      <div className="flex items-center space-x-2 mb-1">
+                        <span className="text-xs font-medium text-gray-500">{episode.broadcast?.time}
+                        </span>
+                        <Badge variant="outline" className="text-xs">
+                          {episode.episodes}
+                        </Badge>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
+                      <h4 className="font-medium text-sm text-gray-900 mb-1">{episode.title}</h4>
+                      {/* <div className="flex flex-wrap gap-1">
+                        {episode.genres.map((genre) => (
+                          <Badge key={genre} variant="secondary" className="text-xs">
+                            {genre}
+                          </Badge>
+                        ))}
+                      </div> */}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
             ))}
           </div>
         </section>
 
-
+        {/* Schedule Grid */}
         {/* Empty state */}
         {
           Object.keys(grouped).length === 0 && (
