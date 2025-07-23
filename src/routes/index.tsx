@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Carousel,
@@ -6,8 +7,6 @@ import {
 } from "@/components/ui/carousel";
 import { createFileRoute, useLoaderData } from '@tanstack/react-router';
 import Autoplay from 'embla-carousel-autoplay';
-import { Clock } from 'lucide-react';
-import { Badge } from "@/components/ui/badge"
 import { useEffect, useState } from 'react';
 
 
