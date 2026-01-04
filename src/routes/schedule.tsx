@@ -1,7 +1,6 @@
-import { createFileRoute, useLoaderData } from '@tanstack/react-router'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { useEffect, useState } from 'react'
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { createFileRoute, useLoaderData } from '@tanstack/react-router';
 
 interface AiringSchedule {
   airingAt: number;
@@ -75,15 +74,15 @@ export const Route = createFileRoute('/schedule')({
 
 function RouteComponent() {
   const schedules = useLoaderData({ from: Route.id }) as AiringSchedule[]
-  const [currentTime, setCurrentTime] = useState(new Date());
+  // const [currentTime, setCurrentTime] = useState(new Date());
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 60000); // Update every minute
+  // useEffect(() => {
+  //   const timer = setInterval(() => {
+  //     setCurrentTime(new Date());
+  //   }, 60000);
 
-    return () => clearInterval(timer);
-  }, []);
+  //   return () => clearInterval(timer);
+  // }, []);
 
   function groupByDay(schedules: AiringSchedule[]) {
     const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Unknown'];
